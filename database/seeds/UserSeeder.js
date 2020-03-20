@@ -21,6 +21,7 @@ class UserSeeder {
         {
           username: "João Silva",
           email: "joao@email.com",
+          cpf: "00000000000",
           password: await Hash.make("123123")
         }
       )

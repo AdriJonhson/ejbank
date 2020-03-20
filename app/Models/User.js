@@ -38,6 +38,10 @@ class User extends Model {
   static get hidden () {
     return ['password']
   }
+
+  account() {
+    return this.hasOne('App/Models/Account')
+  }
 }
 
 module.exports = User

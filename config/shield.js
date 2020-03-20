@@ -135,7 +135,7 @@ module.exports = {
     enable: true,
     methods: ['POST', 'PUT', 'DELETE'],
     filterUris: [
-      '/api/auth'
+      '/api/v1/(.*)'
     ],
     cookieOptions: {
       httpOnly: false,

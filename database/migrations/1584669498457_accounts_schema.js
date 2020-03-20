@@ -13,7 +13,7 @@ class AccountsSchema extends Schema {
 
       table.string('number', 80).notNullable().unique()
       table.string('agency', 80).notNullable().unique()
-      table.double('float ').default(0)
+      table.double('ballance ').default(0)
       table.boolean('active').default(true)
       table.timestamps()
     })

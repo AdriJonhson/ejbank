@@ -16,7 +16,11 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.on('/').render('welcome')
+Route.post('/api/v1/login', 'API/AuthController.login');
 
-Route.post('/api/auth', 'API/AuthController.login');
-Route.get('/api/profile', 'API/UserController.profile').middleware(['auth']);
+Route
+  .group(() => {
+    Route.get('/profile', 'API/UserController.profile');
+  })
+  .prefix('/api/v1')
+  .middleware(['auth:jwt'])
