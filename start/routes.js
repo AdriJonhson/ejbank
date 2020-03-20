@@ -19,3 +19,4 @@ const Route = use('Route')
 Route.on('/').render('welcome')
 
 Route.post('/api/auth', 'API/AuthController.login');
+Route.get('/api/profile', 'API/UserController.profile').middleware(['auth']);
