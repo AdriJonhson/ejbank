@@ -21,6 +21,7 @@ Route.post('/api/v1/login', 'API/AuthController.login');
 Route
   .group(() => {
     Route.get('/profile', 'API/UserController.profile');
+    Route.put('/transfer', 'API/UserController.transfer');
   })
   .prefix('/api/v1')
   .middleware(['auth:jwt'])
