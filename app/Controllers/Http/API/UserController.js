@@ -40,46 +40,61 @@ class UserController {
     const rules = {
       number: 'required',
       agency: 'required',
-      value: 'required',
+      transferValue: 'required|number|above:0',
     }
 
     const validation = await validate(request.all(), rules, formatters.JsonApi)
 
     if (validation.fails()) {
-        return response
-            .status(422)
-            .json(validation.messages())
+        return response.status(422).json(validation.messages())
     }
 
     try{
-      const { number, agency, value } = request.all();
-      const user                      = await auth.getUser();
-      const userAccount               = await user.account().fetch();
+      const { number, agency, transferValue } = request.all();
+      const user                              = await auth.getUser();
+      const userAccount                       = await user.account().fetch();
 
-      if(value > userAccount.ballance){
-        return response
-            .status(400)
-            .send({data: null, message: "Insufficient funds"});
+      if(transferValue > userAccount.ballance){
+        return response.status(400).send({data: null, message: "Insufficient funds"});
       }
 
-      const account = await Account
-                  .query()
-                  .where('number', number)
-                  .where('agency', agency)
-                  .where('user_id', '!=', user.id)
-                  .getCount();
+      const transferData = {
+        number, agency, transferValue
+      };
 
-      if(account == 0){
-        return response
-          .status(400)
-          .send({data: null, message: "Account not found"});
-      }
+      let transferResponse = await this.transferToUser(user, userAccount, transferData);
+
+      return response.status(transferResponse.code).send({data: transferResponse.data, message: transferResponse.message});
 
     }catch(error) {
-      return response
-        .status(400)
-        .send({data: null, message: error.message});
+      return response.status(500).send({data: null, message: error.message});
     }
+  }
+
+  async transferToUser(user, userAccount, transferData)
+  {
+    const recipientUser = await Account
+        .query()
+        .where('number', transferData.number)
+        .where('agency', transferData.agency)
+        .where('user_id', '!=', user.id)
+        .first();
+
+    if(!recipientUser){
+      return {data: null, message: "Account not found", code: 422, success: false};
+    }
+
+    let updateRecipientUserBallance = recipientUser.ballance += transferData.transferValue;
+    recipientUser.save();
+
+    let updateUserBallance          = userAccount.ballance -= transferData.transferValue;
+    userAccount.save();
+
+    if(!updateRecipientUserBallance && !updateUserBallance){
+      return {data: null, message: "Transfer Erro", code: 400, success: false};
+    }
+
+    return {data: null, message: "Transfer Success", code: 200, success: true};
   }
 }
 
